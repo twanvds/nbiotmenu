@@ -41,11 +41,11 @@ static uint8_t EXEC[8] = {
 
 static uint8_t OTR[8] = {
   0b00001000,
-  0b00000100,
-  0b00000010,
-  0b00000001,
-  0b00000010,
-  0b00000100,
+  0b00001100,
+  0b00001010,
+  0b00001001,
+  0b00001010,
+  0b00001100,
   0b00001000,
   0b00000000
 };
@@ -62,6 +62,16 @@ static uint8_t CTR[8] = {
   0b00000000
 };
 
+static uint8_t OD[8] = {
+  0b00000000,
+  0b00000100,
+  0b00001010,
+  0b00010001,
+  0b00001010,
+  0b00000100,
+  0b00000000,
+  0b00000000
+};
 
 Screen::Screen() {}
 
@@ -211,9 +221,10 @@ void Screen::setupCustomCharacters(void) {
   // Set up characters not available in the LCD driver characterset:
   lcd->createChar(1, UP); // Up.
   lcd->createChar(2, DN); // Down.
-  lcd->createChar(3, EXEC); // Diamond.
+  lcd->createChar(3, EXEC); // (Closed) Diamond.
   lcd->createChar(4, OTR); // Open Triangle Right.
   lcd->createChar(5, CTR); // Closed Triangle Right.
+  lcd->createChar(6, OD); // Open Diamond.
 }
 
 void Screen::dump(void) {

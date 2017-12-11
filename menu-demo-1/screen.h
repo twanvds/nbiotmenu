@@ -29,6 +29,7 @@
 #define CH_X "\x03"
 #define CH_OTR "\x04"
 #define CH_CTR "\x05"
+#define CH_OD  "\x06"
 
 class Screen {
   private:

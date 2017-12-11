@@ -54,13 +54,13 @@ char *MenuText[] = {
   "SEND" CH_X CH_L CH_U,
   "NBIOT " CH_U CH_R,
   "RADIO" CH_X CH_L CH_D,
-  "RECV" CH_X CH_L CH_U CH_D,
+  "RECV" CH_OD CH_L CH_U CH_D,
   "REBOOT" CH_X CH_L CH_U CH_D,
   "NCONFIG?" CH_X CH_L CH_U CH_D,
   "NEUSTATS" CH_X CH_L CH_U CH_D,
   "TEST " CH_L CH_U CH_D CH_R,
-  "SEND" CH_X CH_L,
-  "SNR" CH_X CH_L CH_U
+  "SEND" CH_OD CH_L,
+  "SNR" CH_OD CH_L CH_U
 };
 
 typedef enum {
@@ -89,16 +89,17 @@ void setup() {
   digitalWrite(NBIOT_PWR, HIGH);
   nbiot.begin(9600);
 
+  // Associate screen buffer viewer with the LCD display:
   screen = Screen(&lcd);
 
-  lcd.print("NB IoT Menu " CH_X CH_OTR CH_CTR);
+  lcd.print("NB IoT Menu "  CH_X CH_OD ">" CH_CTR);
   for (uint8_t color = 0; color < 8; color++) {
     lcd.setBacklight(color);
     delay(200);
   }
   lcd.setBacklight(WHITE);
   delay(1000);
-
+  return;
   lcd.home();
   lcd.clear();
   menustate = sUSB;
