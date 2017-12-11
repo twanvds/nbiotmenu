@@ -91,7 +91,7 @@ void setup() {
 
   screen = Screen(&lcd);
 
-  lcd.print("Twan's Menu " CH_X CH_OTR CH_CTR);
+  lcd.print("NB IoT Menu " CH_X CH_OTR CH_CTR);
   for (uint8_t color = 0; color < 8; color++) {
     lcd.setBacklight(color);
     delay(200);
@@ -623,9 +623,7 @@ void loop() {
     lcd.setCursor(0, 0);
     lcd.print(MenuText[menustate]);
     Serial.println(MenuText[menustate]);
-    button = 0;
     wait = false;
-//    delay(200);
 
 
   }
