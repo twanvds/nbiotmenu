@@ -34,7 +34,8 @@ The menu is built as follows:
     6. TEST
 
 The menu is navigated by the 4 "cursor" buttons. The 5th button at the rightside of the "cursorgroup" is the SELECT button.
-The menu item is followed by characters hinting which actions are allowed: left, up, down, right and a little black diamond indicating that hitting the select button is to activate the underlying function. The display will flash red-white when you attempt an illegal action
+The menu item is followed by characters hinting which actions are allowed: left, up, down, right and a little black diamond indicating that hitting the select button is to activate the underlying function. A little _open_ diamond signals a disabled (or NYI) action. The display will flash red-white when you attempt an illegal action.
+
 The convention is during a white background is:
 * left - exit the (sub)menu
 * right - enter a submenu
@@ -51,10 +52,11 @@ The application has two modal states (i.e. not allowing user input):
 * green background - the application awaits/processes output from the NB-IoT module or the USB interface 
 * blue background - the application is sending data to the NB-IoT module or USB interface
 
-When the application has been receiving data, the next mode is the viewer mode. With the USB receive test as an exception, in this case the received characters are shown immediately.
-Most of the time you should be able to exit such a modal state by hitting on the select button.
+When the application has been receiving data, the next mode is the viewer mode. With the USB receive test as an exception, in this case the received characters are shown immediately. Most of the time you should be able to exit such a modal state by hitting on the select button.
 
+## debug output
 
+This version spills its lots of debug information to `Serial` with a default speed of 115200 baud.
 
 
 
