@@ -53,6 +53,8 @@ class Screen {
     bool escape(void);
     void reset(void);
 
+    void flash_error(void);
+
     void setupCustomCharacters(void);
     
     void test(void) {

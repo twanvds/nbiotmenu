@@ -132,9 +132,9 @@ void Screen::refresh(void) {
 
 
 uint8_t Screen::get_button(void) {
-  static uint8_t prev_b =0;
+  static uint8_t prev_b = 0;
   uint8_t b = lcd->readButtons();
-  if(prev_b == b) return 0;
+  if (prev_b == b) return 0;
   if (b & BUTTON_SELECT) {
     b = BUTTON_SELECT;
   } else if (b & BUTTON_LEFT) {
@@ -196,6 +196,14 @@ bool Screen::escape(void) {
     };
   }
   return false;
+}
+
+void Screen::flash_error(void) {
+  // flash_error(): flash the screen to inform the user of an error:
+  for (int f = 0; f < 4; f++) {
+    lcd->setBacklight((f & 0x01) ? WHITE : RED);
+    delay(150);
+  }
 }
 
 

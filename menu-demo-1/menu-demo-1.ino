@@ -107,15 +107,6 @@ void setup() {
   delay(2000);
 }
 
-// flash_error(): flash the screen to inform the user of an error:
-void flash_error() {
-  for (int f = 0; f < 4; f++) {
-    lcd.setBacklight((f & 0x01) ? WHITE : RED);
-    Serial.println((f & 0x01) ? "WHITE" : "RED");
-    delay(150);
-  }
-}
-
 // test_sub_speed() check the currently selected USB speed against
 // the current menu state.
 void usb_speed_test(MenuState_t ms) {
@@ -150,7 +141,7 @@ void set_usb_speed(unsigned long speed) {
 void usb_test_receiving() {
   unsigned long ccnt = 0;
   uint8_t buttons = 0;
-  lcd.setBacklight(BLUE);
+  lcd.setBacklight(GREEN);
   lcd.clear();
   lcd.home();
   delay(200);
@@ -173,7 +164,7 @@ void usb_test_sending() {
   char c = ' ';
   int16_t ccnt = 0;
 
-  lcd.setBacklight(YELLOW);
+  lcd.setBacklight(BLUE);
   lcd.clear();
   lcd.home();
   delay(200);
@@ -360,7 +351,7 @@ void loop() {
             menustate = sNBIOT;
             break;
           default:
-            flash_error();
+            screen.flash_error();
         }
         break;
       case sUSB_SPEED:
@@ -376,7 +367,7 @@ void loop() {
             menustate = sUSB;
             menu_speed_setting = false;
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sUSB_SPEED_115200:
@@ -390,7 +381,7 @@ void loop() {
           case BUTTON_SELECT:
             set_usb_speed(115200UL);
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sUSB_SPEED_57600:
@@ -407,7 +398,7 @@ void loop() {
           case BUTTON_SELECT:
             set_usb_speed(57600UL);
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sUSB_SPEED_9600:
@@ -424,7 +415,7 @@ void loop() {
           case BUTTON_SELECT:
             set_usb_speed(9600UL);
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sUSB_SPEED_2400:
@@ -438,7 +429,7 @@ void loop() {
           case BUTTON_SELECT:
             set_usb_speed(2400UL);
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sUSB_TEST:
@@ -453,7 +444,7 @@ void loop() {
           case BUTTON_LEFT:
             menustate = sUSB;
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sUSB_TEST_RECV:
@@ -467,7 +458,7 @@ void loop() {
           case BUTTON_SELECT:
             usb_test_receiving();
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sUSB_TEST_SEND:
@@ -481,7 +472,7 @@ void loop() {
           case BUTTON_SELECT:
             usb_test_sending();
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       // NBIOT:
@@ -493,7 +484,7 @@ void loop() {
           case BUTTON_RIGHT:
             menustate = sNBIOT_RADIO_TOGGLE;
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sNBIOT_RADIO_TOGGLE:
@@ -507,7 +498,7 @@ void loop() {
           case BUTTON_SELECT:
             nbiot_radio_toggle();
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sNBIOT_RECV:
@@ -521,7 +512,7 @@ void loop() {
           case BUTTON_LEFT:
             menustate = sNBIOT;
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sNBIOT_REBOOT:
@@ -538,7 +529,7 @@ void loop() {
           case BUTTON_SELECT:
             nbiot_reboot();
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sNBIOT_NCONFIG:
@@ -555,7 +546,7 @@ void loop() {
           case BUTTON_SELECT:
             nbiot_get_config();
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sNBIOT_NEUSTATS:
@@ -572,7 +563,7 @@ void loop() {
           case BUTTON_SELECT:
             nbiot_get_status();
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sNBIOT_TEST:
@@ -589,7 +580,7 @@ void loop() {
           case BUTTON_LEFT:
             menustate = sNBIOT;
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sNBIOT_TEST_SEND:
@@ -597,7 +588,7 @@ void loop() {
           case  BUTTON_LEFT:
             menustate = sNBIOT_TEST;
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
       case sNBIOT_SNR:
@@ -608,10 +599,10 @@ void loop() {
           case BUTTON_LEFT:
             menustate = sNBIOT;
             break;
-          default: flash_error();
+          default: screen.flash_error();
         }
         break;
-      default: flash_error(); // Illegal menu state !!!
+      default: screen.flash_error(); // Illegal menu state !!!
     }
     if (menu_speed_setting) {
       lcd.setCursor(0, 1);
