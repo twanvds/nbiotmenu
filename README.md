@@ -37,6 +37,7 @@ The menu is navigated by the 4 "cursor" buttons. The 5th button at the rightside
 The menu item is followed by characters hinting which actions are allowed: left, up, down, right and a little black diamond indicating that hitting the select button is to activate the underlying function. A little _open_ diamond signals a disabled (or NYI) action. The display will flash red-white when you attempt an illegal action.
 
 The convention is during a white background is:
+
 * left - exit the (sub)menu
 * right - enter a submenu
 * up - previous item in the current menu
@@ -44,11 +45,13 @@ The convention is during a white background is:
 * select - activate function.
 
 The convention during a yellow background is, i.e. with the response buffer viewer active:
+
 * left, right - scroll the display either left or right
 * up, down - scroll the display over the response buffer up and down
 * select - leave the viewer and return to the last menu item.
 
 The application has two modal states (i.e. not allowing user input):
+
 * green background - the application awaits/processes output from the NB-IoT module or the USB interface 
 * blue background - the application is sending data to the NB-IoT module or USB interface
 
