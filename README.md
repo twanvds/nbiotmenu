@@ -8,7 +8,14 @@ It assumes an Arduino project stacked with:
 
 * A [16x2 Alphanumeric LCD display and 5 pushbuttons shield from Adafruit](https://www.adafruit.com/product/716)
 * The [Sodaq NB-IoT shield](https://shop.sodaq.com/nl/nb-iot-shield-deluxe-single-band-5-of-band-28.html)
-* An [Arduino Leonardo](https://store.arduino.cc/arduino-leonardo-with-headers)
+* The [Arduino M0 Pro](https://store.arduino.cc/arduino-m0-pro)
+
+## Arduino Leonardo v.s. M0 Pro
+Previously I used an [Arduino Leonardo](https://store.arduino.cc/arduino-leonardo-with-headers), but I found them too finicky to deem them reliable.  When a sketch becomes larger then 50% of the available flash and/or more than 70% of the dynamic memory is used, uploading the sketches becomes problematic. You need a trick to get the board accepting uploads again. 
+
+When `avrdude` complains it can't find the board or port, you retry uploading during a reset of the board while the IDE is looking for a port associated with the board, when the port is "lost". This happens a lot, too much to my taste. After `avrdude` you need to reset the board yourself and even then it is not guaranteed the board boots with the appropriate code.
+
+I don't think it was a good idea to integrate the USB into the microcontroller, not for the type of usage a typical Arduino board has and that's experimenting with these devices without the "fear" of "damaging" it.  
 
 The application assumes T-Mobile as the NB-IoT provider.
 
