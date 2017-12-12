@@ -58,12 +58,6 @@ class Screen {
 
     void setupCustomCharacters(void);
     
-    void test(void) {
-      lcd->clear();
-      lcd->home();
-      lcd->print("Hello!");
-    };
-
 };
 #endif // _SCREEN_H_
 
