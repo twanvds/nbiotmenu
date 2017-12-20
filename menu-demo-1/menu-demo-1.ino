@@ -18,19 +18,19 @@
 #include <Sodaq_OnOffBee.h>
 
 #if defined(ARDUINO_AVR_LEONARDO)
-#define DEBUG_STREAM Serial 
+#define DEBUG_STREAM Serial
 #define MODEM_STREAM Serial1
-#define powerPin 7 
+#define powerPin 7
 
 #elif defined(ARDUINO_SODAQ_EXPLORER)
 #define DEBUG_STREAM SerialUSB
 #define MODEM_STREAM Serial
-#define powerPin 7 
+#define powerPin 7
 
 #elif defined(ARDUINO_SAM_ZERO)
 #define DEBUG_STREAM SerialUSB
 #define MODEM_STREAM Serial1
-#define powerPin 7 
+#define powerPin 7
 
 #else
 #error "Please select a Sodaq ExpLoRer, Arduino Leonardo, Arduino M0 (Crowduino M0) or add your board."
@@ -55,10 +55,10 @@ typedef enum {
   sNBIOT_REBOOT,
   sNBIOT_NCONFIG,
   sNBIOT_NEUSTATS,
+  sNBIOT_IMEI,
   sNBIOT_TEST,
   sNBIOT_TEST_SEND,
-  sNBIOT_IMEI,
-  sPASSTHROUGH
+  sNBIOT_TEST_PASSTHROUGH
 } MenuState_t;
 
 
@@ -73,16 +73,16 @@ char *MenuText[] = {
   "TEST " CH_L CH_U CH_R,
   "RECV" CH_X CH_L CH_D,
   "SEND" CH_X CH_L CH_U,
-  "NBIOT " CH_U CH_D CH_R,
+  "NBIOT " CH_U CH_R,
   "RADIO" CH_X CH_L CH_D,
   "RECV" CH_OD CH_L CH_U CH_D,
   "REBOOT" CH_X CH_L CH_U CH_D,
   "NCONFIG?" CH_X CH_L CH_U CH_D,
   "NEUSTATS" CH_X CH_L CH_U CH_D,
-  "TEST " CH_L CH_U CH_D CH_R,
-  "SEND" CH_OD CH_L,
-  "IMEI" CH_X CH_OD CH_L CH_U,
-  "PASSTHROUGH" CH_X CH_U
+  "IMEI" CH_X CH_L CH_U CH_D,
+  "TEST " CH_L CH_U CH_R,
+  "SEND" CH_OD CH_L CH_U CH_D,
+  "PASSTHROUGH" CH_OD CH_L CH_U
 };
 
 typedef enum {
@@ -317,14 +317,14 @@ NBIOTStatus_t nbiot_get_config() {
   return status;
 }
 
-NBIOTStatus_t nbiot_get_cell_status() {
+NBIOTStatus_t nbiot_get_radio_status() {
   lcd.setBacklight(GREEN);
   screen.clearDisplay();
   char *msg = "Get NUE Status...";
   screen.add_line(msg, strlen(msg), true);
   delay(150);
 
-  nbiot_atcmd("NUESTATS?");
+  nbiot_atcmd("NUESTATS=\"RADIO\"");
 
   NBIOTStatus_t status = nbiot_response();
   delay(2000);
@@ -377,14 +377,14 @@ NBIOTStatus_t nbiot_radio_toggle() {
 void passthrough(void) {
   uint8_t baud = 0;
   uint8_t button = 0;
-  char c ='\0';
+  char c = '\0';
   lcd.clear();
   lcd.home();
   lcd.setBacklight(YELLOW);
-  
+
 
   while (button != BUTTON_SELECT) {
-    
+
     while (Serial.available())
     {
       c = Serial.read();
@@ -400,10 +400,10 @@ void passthrough(void) {
     }
 
     // check if the USB virtual serial wants a new baud rate
-//    if (Serial.baud() != baud) {
-//      baud = Serial.baud();
-//      nbiot.begin(baud);
-//    }
+    //    if (Serial.baud() != baud) {
+    //      baud = Serial.baud();
+    //      nbiot.begin(baud);
+    //    }
 
     button = screen.get_button();
 
@@ -411,308 +411,312 @@ void passthrough(void) {
   lcd.setBacklight(WHITE);
 }
 
-  void loop() {
-    uint8_t button = screen.get_button();
+void loop() {
+  uint8_t button = screen.get_button();
 
-    if (button && !wait) {
-      wait = true;
-      lcd.clear();
-      lcd.setCursor(0, 0);
+  if (button && !wait) {
+    wait = true;
+    lcd.clear();
+    lcd.setCursor(0, 0);
 
-      switch (menustate) {
-        case sUSB:
-          switch (button) {
-            case BUTTON_RIGHT:
-              menustate = sUSB_SPEED;
-              menu_speed_setting = true;
-              break;
-            case BUTTON_DOWN:
-              menustate = sNBIOT;
-              break;
-            default:
-              screen.flash_error();
-          }
-          break;
-        case sUSB_SPEED:
-          switch (button) {
-            case BUTTON_DOWN:
-              menustate = sUSB_TEST;
-              menu_speed_setting = false;
-              break;
-            case BUTTON_RIGHT:
-              menustate = sUSB_SPEED_115200;
-              break;
-            case BUTTON_LEFT:
-              menustate = sUSB;
-              menu_speed_setting = false;
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sUSB_SPEED_115200:
-          switch (button) {
-            case BUTTON_DOWN:
-              menustate = sUSB_SPEED_57600;
-              break;
-            case BUTTON_LEFT:
-              menustate = sUSB_SPEED;
-              break;
-            case BUTTON_SELECT:
-              set_usb_speed(115200UL);
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sUSB_SPEED_57600:
-          switch (button) {
-            case BUTTON_UP:
-              menustate = sUSB_SPEED_115200;
-              break;
-            case BUTTON_DOWN:
-              menustate = sUSB_SPEED_9600;
-              break;
-            case BUTTON_LEFT:
-              menustate = sUSB_SPEED;
-              break;
-            case BUTTON_SELECT:
-              set_usb_speed(57600UL);
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sUSB_SPEED_9600:
-          switch (button) {
-            case BUTTON_UP:
-              menustate = sUSB_SPEED_57600;
-              break;
-            case BUTTON_DOWN:
-              menustate = sUSB_SPEED_2400;
-              break;
-            case BUTTON_LEFT:
-              menustate = sUSB_SPEED;
-              break;
-            case BUTTON_SELECT:
-              set_usb_speed(9600UL);
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sUSB_SPEED_2400:
-          switch (button) {
-            case BUTTON_UP:
-              menustate = sUSB_SPEED_9600;
-              break;
-            case BUTTON_LEFT:
-              menustate = sUSB_SPEED;
-              break;
-            case BUTTON_SELECT:
-              set_usb_speed(2400UL);
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sUSB_TEST:
-          switch (button) {
-            case BUTTON_RIGHT:
-              menustate = sUSB_TEST_RECV;
-              break;
-            case BUTTON_UP:
-              menustate = sUSB_SPEED;
-              menu_speed_setting = true;
-              break;
-            case BUTTON_LEFT:
-              menustate = sUSB;
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sUSB_TEST_RECV:
-          switch (button) {
-            case  BUTTON_DOWN:
-              menustate = sUSB_TEST_SEND;
-              break;
-            case BUTTON_LEFT:
-              menustate = sUSB_TEST;
-              break;
-            case BUTTON_SELECT:
-              usb_test_receiving();
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sUSB_TEST_SEND:
-          switch (button) {
-            case  BUTTON_UP:
-              menustate = sUSB_TEST_RECV;
-              break;
-            case BUTTON_LEFT:
-              menustate = sUSB_TEST;
-              break;
-            case BUTTON_SELECT:
-              usb_test_sending();
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        // NBIOT:
-        case sNBIOT:
-          switch (button) {
-            case  BUTTON_UP:
-              menustate = sUSB;
-              break;
-            case BUTTON_DOWN:
-              menustate = sPASSTHROUGH;
-              break;
-            case BUTTON_RIGHT:
-              menustate = sNBIOT_RADIO_TOGGLE;
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sNBIOT_RADIO_TOGGLE:
-          switch (button) {
-            case  BUTTON_DOWN:
-              menustate = sNBIOT_RECV;
-              break;
-            case BUTTON_LEFT:
-              menustate = sNBIOT;
-              break;
-            case BUTTON_SELECT:
-              nbiot_radio_toggle();
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sNBIOT_RECV:
-          switch (button) {
-            case  BUTTON_UP:
-              menustate = sNBIOT_RADIO_TOGGLE;
-              break;
-            case BUTTON_DOWN:
-              menustate = sNBIOT_REBOOT;
-              break;
-            case BUTTON_LEFT:
-              menustate = sNBIOT;
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sNBIOT_REBOOT:
-          switch (button) {
-            case  BUTTON_UP:
-              menustate = sNBIOT_RECV;
-              break;
-            case BUTTON_DOWN:
-              menustate = sNBIOT_NCONFIG;
-              break;
-            case BUTTON_LEFT:
-              menustate = sNBIOT;
-              break;
-            case BUTTON_SELECT:
-              nbiot_reboot();
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sNBIOT_NCONFIG:
-          switch (button) {
-            case  BUTTON_UP:
-              menustate = sNBIOT_REBOOT;
-              break;
-            case BUTTON_DOWN:
-              menustate = sNBIOT_NEUSTATS;
-              break;
-            case BUTTON_LEFT:
-              menustate = sNBIOT;
-              break;
-            case BUTTON_SELECT:
-              nbiot_get_config();
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sNBIOT_NEUSTATS:
-          switch (button) {
-            case  BUTTON_UP:
-              menustate = sNBIOT_NCONFIG;
-              break;
-            case BUTTON_DOWN:
-              menustate = sNBIOT_TEST;
-              break;
-            case BUTTON_LEFT:
-              menustate = sNBIOT;
-              break;
-            case BUTTON_SELECT:
-              nbiot_get_cell_status();
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sNBIOT_TEST:
-          switch (button) {
-            case  BUTTON_UP:
-              menustate = sNBIOT_REBOOT;
-              break;
-            case BUTTON_DOWN:
-              menustate = sNBIOT_IMEI;
-              break;
-            case BUTTON_RIGHT:
-              menustate = sNBIOT_TEST_SEND;
-              break;
-            case BUTTON_LEFT:
-              menustate = sNBIOT;
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sNBIOT_TEST_SEND:
-          switch (button) {
-            case  BUTTON_LEFT:
-              menustate = sNBIOT_TEST;
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sNBIOT_IMEI:
-          switch (button) {
-            case BUTTON_SELECT:
-              nbiot_get_imei();
-              break;
-            case BUTTON_UP:
-              menustate = sNBIOT_TEST;
-              break;
-            case BUTTON_LEFT:
-              menustate = sNBIOT;
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        case sPASSTHROUGH:
-          switch (button) {
-            case BUTTON_UP:
-              menustate = sNBIOT;
-              break;
-            case BUTTON_SELECT:
-              passthrough();
-              break;
-            default: screen.flash_error();
-          }
-          break;
-        default: screen.flash_error(); // Illegal menu state !!!
-      }
-      if (menu_speed_setting) {
-        lcd.setCursor(0, 1);
-        lcd.print("Speed: ");
-        lcd.print(current_usb_speed);
-      }
+    switch (menustate) {
+      case sUSB:
+        switch (button) {
+          case BUTTON_RIGHT:
+            menustate = sUSB_SPEED;
+            menu_speed_setting = true;
+            break;
+          case BUTTON_DOWN:
+            menustate = sNBIOT;
+            break;
+          default:
+            screen.flash_error();
+        }
+        break;
+      case sUSB_SPEED:
+        switch (button) {
+          case BUTTON_DOWN:
+            menustate = sUSB_TEST;
+            menu_speed_setting = false;
+            break;
+          case BUTTON_RIGHT:
+            menustate = sUSB_SPEED_115200;
+            break;
+          case BUTTON_LEFT:
+            menustate = sUSB;
+            menu_speed_setting = false;
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sUSB_SPEED_115200:
+        switch (button) {
+          case BUTTON_DOWN:
+            menustate = sUSB_SPEED_57600;
+            break;
+          case BUTTON_LEFT:
+            menustate = sUSB_SPEED;
+            break;
+          case BUTTON_SELECT:
+            set_usb_speed(115200UL);
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sUSB_SPEED_57600:
+        switch (button) {
+          case BUTTON_UP:
+            menustate = sUSB_SPEED_115200;
+            break;
+          case BUTTON_DOWN:
+            menustate = sUSB_SPEED_9600;
+            break;
+          case BUTTON_LEFT:
+            menustate = sUSB_SPEED;
+            break;
+          case BUTTON_SELECT:
+            set_usb_speed(57600UL);
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sUSB_SPEED_9600:
+        switch (button) {
+          case BUTTON_UP:
+            menustate = sUSB_SPEED_57600;
+            break;
+          case BUTTON_DOWN:
+            menustate = sUSB_SPEED_2400;
+            break;
+          case BUTTON_LEFT:
+            menustate = sUSB_SPEED;
+            break;
+          case BUTTON_SELECT:
+            set_usb_speed(9600UL);
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sUSB_SPEED_2400:
+        switch (button) {
+          case BUTTON_UP:
+            menustate = sUSB_SPEED_9600;
+            break;
+          case BUTTON_LEFT:
+            menustate = sUSB_SPEED;
+            break;
+          case BUTTON_SELECT:
+            set_usb_speed(2400UL);
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sUSB_TEST:
+        switch (button) {
+          case BUTTON_RIGHT:
+            menustate = sUSB_TEST_RECV;
+            break;
+          case BUTTON_UP:
+            menustate = sUSB_SPEED;
+            menu_speed_setting = true;
+            break;
+          case BUTTON_LEFT:
+            menustate = sUSB;
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sUSB_TEST_RECV:
+        switch (button) {
+          case  BUTTON_DOWN:
+            menustate = sUSB_TEST_SEND;
+            break;
+          case BUTTON_LEFT:
+            menustate = sUSB_TEST;
+            break;
+          case BUTTON_SELECT:
+            usb_test_receiving();
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sUSB_TEST_SEND:
+        switch (button) {
+          case  BUTTON_UP:
+            menustate = sUSB_TEST_RECV;
+            break;
+          case BUTTON_LEFT:
+            menustate = sUSB_TEST;
+            break;
+          case BUTTON_SELECT:
+            usb_test_sending();
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      // NBIOT:
+      case sNBIOT:
+        switch (button) {
+          case  BUTTON_UP:
+            menustate = sUSB;
+            break;
+          case BUTTON_RIGHT:
+            menustate = sNBIOT_RADIO_TOGGLE;
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sNBIOT_RADIO_TOGGLE:
+        switch (button) {
+          case  BUTTON_DOWN:
+            menustate = sNBIOT_RECV;
+            break;
+          case BUTTON_LEFT:
+            menustate = sNBIOT;
+            break;
+          case BUTTON_SELECT:
+            nbiot_radio_toggle();
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sNBIOT_RECV:
+        switch (button) {
+          case  BUTTON_UP:
+            menustate = sNBIOT_RADIO_TOGGLE;
+            break;
+          case BUTTON_DOWN:
+            menustate = sNBIOT_REBOOT;
+            break;
+          case BUTTON_LEFT:
+            menustate = sNBIOT;
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sNBIOT_REBOOT:
+        switch (button) {
+          case  BUTTON_UP:
+            menustate = sNBIOT_RECV;
+            break;
+          case BUTTON_DOWN:
+            menustate = sNBIOT_NCONFIG;
+            break;
+          case BUTTON_LEFT:
+            menustate = sNBIOT;
+            break;
+          case BUTTON_SELECT:
+            nbiot_reboot();
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sNBIOT_NCONFIG:
+        switch (button) {
+          case  BUTTON_UP:
+            menustate = sNBIOT_REBOOT;
+            break;
+          case BUTTON_DOWN:
+            menustate = sNBIOT_NEUSTATS;
+            break;
+          case BUTTON_LEFT:
+            menustate = sNBIOT;
+            break;
+          case BUTTON_SELECT:
+            nbiot_get_config();
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sNBIOT_NEUSTATS:
+        switch (button) {
+          case  BUTTON_UP:
+            menustate = sNBIOT_NCONFIG;
+            break;
+          case BUTTON_DOWN:
+            menustate = sNBIOT_IMEI;
+            break;
+          case BUTTON_LEFT:
+            menustate = sNBIOT;
+            break;
+          case BUTTON_SELECT:
+            nbiot_get_radio_status();
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sNBIOT_IMEI:
+        switch (button) {
+          case BUTTON_SELECT:
+            nbiot_get_imei();
+            break;
+          case BUTTON_UP:
+            menustate = sNBIOT_NEUSTATS;
+            break;
+          case BUTTON_DOWN:
+            menustate = sNBIOT_TEST;
+            break;
+          case BUTTON_LEFT:
+            menustate = sNBIOT;
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sNBIOT_TEST:
+        switch (button) {
+          case  BUTTON_UP:
+            menustate = sNBIOT_IMEI;
+            break;
+          case BUTTON_RIGHT:
+            menustate = sNBIOT_TEST_SEND;
+            break;
+          case BUTTON_LEFT:
+            menustate = sNBIOT;
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      case sNBIOT_TEST_SEND:
+        switch (button) {
+          case  BUTTON_LEFT:
+            menustate = sNBIOT_TEST;
+            break;
+          case BUTTON_DOWN:
+            menustate = sNBIOT_TEST_PASSTHROUGH;
+            break;
+          default: screen.flash_error();
+        }
+        break;
 
-      usb_speed_test(menustate);
-      lcd.setCursor(0, 0);
-      lcd.print(MenuText[menustate]);
-      Serial.println(MenuText[menustate]);
-      wait = false;
-
-
+      case sNBIOT_TEST_PASSTHROUGH:
+        switch (button) {
+          case BUTTON_UP:
+            menustate = sNBIOT_TEST_SEND;
+            break;
+          case BUTTON_LEFT:
+            menustate = sNBIOT_TEST;
+            break;
+          case BUTTON_SELECT:
+            passthrough();
+            break;
+          default: screen.flash_error();
+        }
+        break;
+      default: screen.flash_error(); // Illegal menu state !!!
     }
+    if (menu_speed_setting) {
+      lcd.setCursor(0, 1);
+      lcd.print("Speed: ");
+      lcd.print(current_usb_speed);
+    }
+
+    usb_speed_test(menustate);
+    lcd.setCursor(0, 0);
+    lcd.print(MenuText[menustate]);
+    Serial.println(MenuText[menustate]);
+    wait = false;
+
+
   }
+}
 
